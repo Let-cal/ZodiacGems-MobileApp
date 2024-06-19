@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 class AppBarProduct extends StatefulWidget implements PreferredSizeWidget {
   final TabBar? tabBar;
+  final ValueChanged<String> onSearch; // Add callback for search input
 
-  const AppBarProduct({super.key, this.tabBar});
+  const AppBarProduct({super.key, this.tabBar, required this.onSearch});
 
   @override
-  _AppBarProductState createState() => _AppBarProductState();
+  _AppBarProductState get createState => _AppBarProductState();
 
   @override
   Size get preferredSize =>
@@ -15,18 +16,27 @@ class AppBarProduct extends StatefulWidget implements PreferredSizeWidget {
 
 class _AppBarProductState extends State<AppBarProduct> {
   bool _isSearchActive = false;
+  TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
       title: _isSearchActive
-          ? const TextField(
-              decoration: InputDecoration(
+          ? TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
                 hintText: 'Search...',
                 border: InputBorder.none,
               ),
-              style: TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.black),
+              onChanged: widget.onSearch, // Notify parent on input change
             )
           : const Text(
               'Order Now',
@@ -44,6 +54,10 @@ class _AppBarProductState extends State<AppBarProduct> {
           ),
           onPressed: () {
             setState(() {
+              if (_isSearchActive) {
+                _searchController.clear();
+                widget.onSearch('');
+              }
               _isSearchActive = !_isSearchActive;
             });
           },

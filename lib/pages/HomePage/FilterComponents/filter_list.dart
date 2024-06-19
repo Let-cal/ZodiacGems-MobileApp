@@ -7,7 +7,7 @@ class FilterList extends StatefulWidget {
   const FilterList({super.key, required this.isVisible, required this.onClose});
 
   @override
-  _FilterListState createState() => _FilterListState();
+  _FilterListState get createState => _FilterListState();
 }
 
 class _FilterListState extends State<FilterList> {

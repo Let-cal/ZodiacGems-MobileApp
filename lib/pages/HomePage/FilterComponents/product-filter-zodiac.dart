@@ -18,10 +18,11 @@ const zodiacs = {
 };
 
 class ProductFilter extends StatefulWidget {
+  // ignore: use_key_in_widget_constructors
   const ProductFilter({Key? key});
 
   @override
-  _ProductFilterState createState() => _ProductFilterState();
+  _ProductFilterState get createState => _ProductFilterState();
 }
 
 class _ProductFilterState extends State<ProductFilter> {

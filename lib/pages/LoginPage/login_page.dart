@@ -2,13 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 class LoginPageWidget extends StatefulWidget {
   const LoginPageWidget({super.key});
 
   @override
-  State<LoginPageWidget> createState() => _LoginPageWidgetState();
+  State<LoginPageWidget> get createState => _LoginPageWidgetState();
 }
 
 class _LoginPageWidgetState extends State<LoginPageWidget>
@@ -96,7 +95,7 @@ class _LoginPageWidgetState extends State<LoginPageWidget>
                 image: DecorationImage(
                   fit: BoxFit.cover,
                   image: NetworkImage(
-                    'https://images.unsplash.com/photo-1571059750747-da7af7729b6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxMXx8em9kaWFjfGVufDB8fHx8MTcxODE4MTYzNHww&ixlib=rb-4.0.3&q=80&w=1080',
+                    'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxfHxhY2Nlc3NvcmllcyUyMHxlbnwwfHx8fDE3MTg2MDQwOTJ8MA&ixlib=rb-4.0.3&q=80&w=1080',
                   ),
                 ),
                 gradient: LinearGradient(
@@ -125,15 +124,32 @@ class _LoginPageWidgetState extends State<LoginPageWidget>
                           borderRadius: BorderRadius.circular(16),
                         ),
                         alignment: const AlignmentDirectional(0, 0),
-                        child: GradientText(
-                          'ZodiacGems',
-                          style: const TextStyle(
-                            fontFamily: 'Allerta Stencil',
-                            fontSize: 50,
-                          ),
-                          colors: const [
-                            Color(0xFF4B39EF),
-                            Color(0xFFEE8B60),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              top: 2,
+                              left: 2,
+                              child: Text(
+                                'ZodiacGems',
+                                style: TextStyle(
+                                  fontFamily: 'Allerta Stencil',
+                                  fontSize: 50,
+                                  letterSpacing: 0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black.withOpacity(0.3),
+                                ),
+                              ),
+                            ),
+                            Text(
+                              'ZodiacGems',
+                              style: TextStyle(
+                                fontFamily: 'Allerta Stencil',
+                                fontSize: 50,
+                                letterSpacing: 0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.yellow[700],
+                              ),
+                            ),
                           ],
                         ),
                       ),

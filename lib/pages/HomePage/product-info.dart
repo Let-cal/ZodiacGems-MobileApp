@@ -5,7 +5,8 @@ class ProductItem extends StatelessWidget {
   final String productName;
   final String price;
 
-  const ProductItem({super.key, 
+  const ProductItem({
+    super.key,
     required this.imageUrl,
     required this.productName,
     required this.price,
@@ -16,6 +17,7 @@ class ProductItem extends StatelessWidget {
     return Container(
       width: MediaQuery.of(context).size.width * 0.4,
       height: 150,
+      margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: Colors.grey[200], // Màu xám nhạt
       ),

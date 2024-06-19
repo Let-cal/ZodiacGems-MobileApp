@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../HomePage/NavBar/nav_bar.dart';
+import '../ViewDetails/view_detail_product_widget.dart';
 import './menu_items.dart';
 import 'app_bar_product.dart';
 
@@ -48,13 +49,24 @@ class SearchPage extends StatefulWidget {
   const SearchPage({super.key, required this.initialTabIndex});
 
   @override
-  _SearchPageState createState() => _SearchPageState();
+  _SearchPageState get createState => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage> {
+  void _navigateToDetailView(
+      BuildContext context, Map<String, dynamic> product) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ViewDetailProductWidget(product: product),
+      ),
+    );
+  }
+
   int _selectedIndex = 1; // Default to Search page
   bool _isCategoryPopupVisible = false;
   final Set<int> _selectedCategoryIds = {};
+  String _searchQuery = '';
 
   Future<List<Map<String, dynamic>>> fetchProducts() async {
     final response = await http
@@ -69,6 +81,7 @@ class _SearchPageState extends State<SearchPage> {
         }
         return {
           'title': item['name-product'],
+          'description-product': item['description-product'],
           'subtext':
               'Category: ${categories[item['category-id']]}, Material: ${materials[item['material-id']]}, Gender: ${genders[item['gender-id']]}, Zodiac: ${zodiacs[item['zodiac-id']]}',
           'imageUrl': imageUrl,
@@ -156,6 +169,16 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
+  void _handleSearch(String query) {
+    setState(() {
+      _searchQuery = query.toLowerCase();
+    });
+  }
+
+  bool _matchesSearchQuery(String title) {
+    return title.toLowerCase().contains(_searchQuery);
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -169,6 +192,7 @@ class _SearchPageState extends State<SearchPage> {
               return Tab(text: entry.value);
             }).toList(),
           ),
+          onSearch: _handleSearch,
         ),
         body: Column(
           children: [
@@ -200,16 +224,20 @@ class _SearchPageState extends State<SearchPage> {
                         return const Center(child: Text('No products found'));
                       } else {
                         final items = snapshot.data!;
+                        final filteredItems = items
+                            .where(
+                                (item) => _matchesSearchQuery(item['title']!))
+                            .toList();
                         return TabBarView(
                           children: zodiacs.keys.map((zodiacId) {
-                            final filteredItems = items
+                            final zodiacFilteredItems = filteredItems
                                 .where((item) =>
                                     item['zodiac-id'] == zodiacId &&
                                     (_selectedCategoryIds.isEmpty ||
                                         _selectedCategoryIds
                                             .contains(item['category-id'])))
                                 .toList();
-                            if (filteredItems.isEmpty) {
+                            if (zodiacFilteredItems.isEmpty) {
                               return const Center(
                                 child: Text(
                                   'No products found for selected category and zodiac.',
@@ -219,12 +247,15 @@ class _SearchPageState extends State<SearchPage> {
                             }
                             return SingleChildScrollView(
                               child: Column(
-                                children: filteredItems.map((item) {
+                                children: zodiacFilteredItems.map((item) {
                                   return MenuItem(
                                     title: item['title']!,
                                     subtext: item['subtext']!,
                                     imageUrl: item['imageUrl']!,
+                                    description: item['description-product']!,
                                     price: item['price']!,
+                                    onTap: (ctx, prod) => _navigateToDetailView(
+                                        ctx, prod), // Gọi hàm từ đây
                                   );
                                 }).toList(),
                               ),

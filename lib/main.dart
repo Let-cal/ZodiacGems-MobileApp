@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import './pages/HomePage/home_page.dart';
 import './pages/LoginPage/login_page.dart';
 import './pages/SearchPage/search_page.dart';
+import './pages/ViewDetails/view_detail_product_widget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,8 +23,9 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => const HomePage(),
         '/login': (context) => const LoginPageWidget(),
-        '/search': (context) =>
-            const SearchPage(initialTabIndex: 0), // Provide a default initialTabIndex
+        '/viewdetails': (context) => const ViewDetailProductWidget(),
+        '/search': (context) => const SearchPage(
+            initialTabIndex: 0), // Provide a default initialTabIndex
       },
     );
   }
