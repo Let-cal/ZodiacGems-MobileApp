@@ -16,7 +16,7 @@ class AppBarProduct extends StatefulWidget implements PreferredSizeWidget {
 
 class _AppBarProductState extends State<AppBarProduct> {
   bool _isSearchActive = false;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void dispose() {

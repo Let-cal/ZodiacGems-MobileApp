@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
+  final String title;
+
+  const CustomAppBar({
+    super.key,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,10 +21,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         },
       ),
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           GradientText(
-            'ZodiacGems',
+            title,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -27,7 +31,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             colors: const [
               Color(0xFFE91E63), // Màu đầu tiên của gradient
               Color(0xFF673AB7), // Màu thứ hai của gradient
-            ], // Thêm nhiều màu nếu cần
+            ],
             gradientDirection: GradientDirection.ltr,
           ),
         ],

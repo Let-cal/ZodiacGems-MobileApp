@@ -45,7 +45,9 @@ class _ViewDetailProductWidgetState extends State<ViewDetailProductWidget> {
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFF1F4F8),
-        appBar: const CustomAppBar(), // Use CustomAppBar here
+        appBar: const CustomAppBar(
+          title: 'My Cart', // Truyền văn bản vào tham số title
+        ),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
