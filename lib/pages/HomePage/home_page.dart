@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart'; // Import logger package
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../ViewDetails/view_detail_product_widget.dart';
 import '../url_API/constants.dart';
 import './FilterComponents/product-filter-zodiac.dart';
 import 'NavBar/nav_bar.dart';
@@ -55,7 +56,7 @@ class _HomePageState extends State<HomePage> {
         if (dataMap.containsKey('list-data') &&
             dataMap['list-data'] is List<dynamic>) {
           final List<dynamic> productList = dataMap['list-data'];
-
+          _logger.d(productList);
           // Ensure productList has at least 4 items
           if (productList.length >= 4) {
             setState(() {
@@ -104,6 +105,16 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _navigateToDetailView(
+      BuildContext context, Map<String, dynamic> product) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ViewDetailProductWidget(product: product),
+      ),
+    );
+  }
+
   List<Widget> buildProductRows() {
     List<Widget> rows = [];
     for (int i = 0; i < products.length; i += 2) {
@@ -111,9 +122,19 @@ class _HomePageState extends State<HomePage> {
       for (int j = i; j < i + 2 && j < products.length; j++) {
         rowChildren.add(
           ProductItem(
-            imageUrl: products[j]['image-urls'][0],
-            productName: products[j]['name-product'],
-            price: '\$${products[j]['price']}',
+            imageUrl: products[j]['image-urls'][0] ?? '', // Ensure not null
+            productName: products[j]['name-product'] ?? '', // Ensure not null
+            price: '\$${products[j]['price']}', // Ensure not null
+            description: products[j]['description-product'] ?? '',
+            // Ensure not null
+            onTap: () {
+              _navigateToDetailView(context, {
+                'imageUrl': products[j]['image-urls'][0] ?? '',
+                'name-product': products[j]['name-product'] ?? '',
+                'price': '\$${products[j]['price']}',
+                'description-product': products[j]['description-product'] ?? '',
+              });
+            },
           ),
         );
       }
