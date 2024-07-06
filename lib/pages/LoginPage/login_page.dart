@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../url_API/constants.dart';
 
 class LoginPageWidget extends StatefulWidget {
   const LoginPageWidget({super.key});
@@ -31,10 +34,10 @@ class _LoginPageWidgetState extends State<LoginPageWidget>
   }
 
   Future<void> _login() async {
-    const String apiUrl =
-        'https://zodiacjewerly.azurewebsites.net/api/authentication/login';
+    const String loginUrl = ApiConstants.loginEndpoint;
+
     final response = await http.post(
-      Uri.parse(apiUrl),
+      Uri.parse(loginUrl),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -48,6 +51,10 @@ class _LoginPageWidgetState extends State<LoginPageWidget>
       final responseBody = jsonDecode(response.body);
 
       if (responseBody['success']) {
+        // Save token using SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', responseBody['token']);
+
         Navigator.pushReplacementNamed(context, '/home');
       } else {
         // Show error message

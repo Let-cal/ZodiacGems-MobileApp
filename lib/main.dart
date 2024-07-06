@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart'; // Import logger package
 
 import './pages/AddCart/cart_page.dart';
 import './pages/HomePage/home_page.dart';
@@ -7,6 +8,8 @@ import './pages/SearchPage/search_page.dart';
 import './pages/ViewDetails/view_detail_product_widget.dart';
 
 void main() {
+  Logger.level =
+      Level.debug; // Thiết lập mức độ log là debug để log tất cả các mức
   runApp(const MyApp());
 }
 

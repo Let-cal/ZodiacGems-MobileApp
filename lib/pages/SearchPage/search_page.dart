@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../HomePage/NavBar/nav_bar.dart';
 import '../ViewDetails/view_detail_product_widget.dart';
+import '../url_API/constants.dart';
 import './menu_items.dart';
 import 'app_bar_product.dart';
 
@@ -67,31 +69,57 @@ class _SearchPageState extends State<SearchPage> {
   bool _isCategoryPopupVisible = false;
   final Set<int> _selectedCategoryIds = {};
   String _searchQuery = '';
+  int _currentPage = 1; // Track current page
+  int _pageSize = ApiConstants.defaultPageSize; // Default page size
+  Future<List<Map<String, dynamic>>> fetchProducts(
+      int page, int pageSize) async {
+    final String getProductUrl =
+        '${ApiConstants.getProductEndpoint}?page=$page&pageSize=$pageSize';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
 
-  Future<List<Map<String, dynamic>>> fetchProducts() async {
-    final response = await http
-        .get(Uri.parse('https://zodiacjewerly.azurewebsites.net/api/products'));
+    final response = await http.get(
+      Uri.parse(getProductUrl),
+      headers: <String, String>{
+        'accept': '/',
+        'Authorization': 'Bearer $token',
+      },
+    );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body)['data'];
-      return data.map((item) {
-        String imageUrl = '';
-        if (item['image-urls'] != null && item['image-urls'].isNotEmpty) {
-          imageUrl = item['image-urls'][0];
+      final Map<String, dynamic> data = json.decode(response.body);
+      // Ensure 'data' contains 'list-data' as List<dynamic>
+      if (data.containsKey('data') && data['data'] is Map<String, dynamic>) {
+        final Map<String, dynamic> dataMap = data['data'];
+        if (dataMap.containsKey('list-data') &&
+            dataMap['list-data'] is List<dynamic>) {
+          final List<dynamic> dataList = dataMap['list-data'];
+          return dataList.map((item) {
+            String imageUrl = '';
+            if (item['image-urls'] != null && item['image-urls'].isNotEmpty) {
+              imageUrl = item['image-urls'][0];
+            }
+            return {
+              'title': item['name-product'],
+              'description-product': item['description-product'],
+              'subtext':
+                  'Category: ${categories[item['category-id']]}, Material: ${materials[item['material-id']]}, Gender: ${genders[item['gender-id']]}, Zodiac: ${zodiacs[item['zodiac-id']]}',
+              'imageUrl': imageUrl,
+              'price': '\$${item['price']}',
+              'zodiac-id': item['zodiac-id'],
+              'category-id': item['category-id'],
+            };
+          }).toList();
+        } else {
+          throw Exception(
+              'Invalid products data format: list-data is not a List<dynamic>.');
         }
-        return {
-          'title': item['name-product'],
-          'description-product': item['description-product'],
-          'subtext':
-              'Category: ${categories[item['category-id']]}, Material: ${materials[item['material-id']]}, Gender: ${genders[item['gender-id']]}, Zodiac: ${zodiacs[item['zodiac-id']]}',
-          'imageUrl': imageUrl,
-          'price': '\$${item['price']}',
-          'zodiac-id': item['zodiac-id'],
-          'category-id': item['category-id'],
-        };
-      }).toList();
+      } else {
+        throw Exception(
+            'Invalid products data format: data is not a Map<String, dynamic>.');
+      }
     } else {
-      throw Exception('Failed to load products');
+      throw Exception('Failed to load products: ${response.statusCode}');
     }
   }
 
@@ -214,57 +242,72 @@ class _SearchPageState extends State<SearchPage> {
               child: Stack(
                 children: [
                   FutureBuilder<List<Map<String, dynamic>>>(
-                    future: fetchProducts(),
+                    future: fetchProducts(_currentPage, _pageSize),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(child: Text('No products found'));
+                        return Center(child: Text('No products found'));
                       } else {
                         final items = snapshot.data!;
                         final filteredItems = items
                             .where(
                                 (item) => _matchesSearchQuery(item['title']!))
                             .toList();
-                        return TabBarView(
-                          children: zodiacs.keys.map((zodiacId) {
-                            final zodiacFilteredItems = filteredItems
-                                .where((item) =>
-                                    item['zodiac-id'] == zodiacId &&
-                                    (_selectedCategoryIds.isEmpty ||
-                                        _selectedCategoryIds
-                                            .contains(item['category-id'])))
-                                .toList();
-                            if (zodiacFilteredItems.isEmpty) {
-                              return const Center(
-                                child: Text(
-                                  'No products found for selected category and zodiac.',
-                                  textAlign: TextAlign.center,
-                                ),
-                              );
-                            }
-                            return SingleChildScrollView(
-                              child: Column(
-                                children: zodiacFilteredItems.map((item) {
-                                  return MenuItem(
-                                    title: item['title']!,
-                                    subtext: item['subtext']!,
-                                    imageUrl: item['imageUrl']!,
-                                    description: item['description-product']!,
-                                    price: item['price']!,
-                                    onTap: (ctx, prod) => _navigateToDetailView(
-                                        ctx, prod), // Gọi hàm từ đây
+                        return Column(
+                          children: [
+                            Expanded(
+                              child: TabBarView(
+                                children: zodiacs.keys.map((zodiacId) {
+                                  final zodiacFilteredItems = filteredItems
+                                      .where((item) =>
+                                          item['zodiac-id'] == zodiacId &&
+                                          (_selectedCategoryIds.isEmpty ||
+                                              _selectedCategoryIds.contains(
+                                                  item['category-id'])))
+                                      .toList();
+                                  if (zodiacFilteredItems.isEmpty) {
+                                    return Center(
+                                      child: Text(
+                                        'No products found for selected category and zodiac.',
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    );
+                                  }
+                                  return Container(
+                                    margin: EdgeInsets.only(
+                                        top:
+                                            25.0), // Khoảng cách dưới giữa các Tab
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        children:
+                                            zodiacFilteredItems.map((item) {
+                                          return MenuItem(
+                                            title: item['title']!,
+                                            subtext: item['subtext']!,
+                                            imageUrl: item['imageUrl']!,
+                                            description:
+                                                item['description-product']!,
+                                            price: item['price']!,
+                                            onTap: (ctx, prod) =>
+                                                _navigateToDetailView(
+                                                    ctx, prod),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
                                   );
                                 }).toList(),
                               ),
-                            );
-                          }).toList(),
+                            ),
+                          ],
                         );
                       }
                     },
                   ),
+                  _buildPaginationControls(), // Pagination controls
                   if (_isCategoryPopupVisible) _buildCategoryPopup(),
                 ],
               ),
@@ -279,6 +322,38 @@ class _SearchPageState extends State<SearchPage> {
           selectedIndex: _selectedIndex,
           onItemTapped: _onItemTapped,
         ),
+      ),
+    );
+  }
+
+  Widget _buildPaginationControls() {
+    return Container(
+      margin: EdgeInsets.only(
+          bottom:
+              16.0), // Khoảng cách dưới là 16.0 điểm ảnh, bạn có thể điều chỉnh theo ý muốn
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              if (_currentPage > 1) {
+                setState(() {
+                  _currentPage--;
+                });
+              }
+            },
+          ),
+          Text('Page $_currentPage'),
+          IconButton(
+            icon: Icon(Icons.arrow_forward),
+            onPressed: () {
+              setState(() {
+                _currentPage++;
+              });
+            },
+          ),
+        ],
       ),
     );
   }

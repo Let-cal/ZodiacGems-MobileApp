@@ -2,7 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart'; // Import logger package
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../url_API/constants.dart';
 import './FilterComponents/product-filter-zodiac.dart';
 import 'NavBar/nav_bar.dart';
 import 'app_bar.dart';
@@ -18,6 +21,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final Logger _logger = Logger(); // Initialize logger
   int _selectedIndex = 2; // Default to HomePage
   List products = [];
 
@@ -28,16 +32,46 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> fetchProducts() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    const String getProductUrl = ApiConstants.getProductEndpoint;
+
     final response = await http.get(
-      Uri.parse('https://zodiacjewerly.azurewebsites.net/api/products'),
-      headers: {'accept': '/'},
+      Uri.parse(getProductUrl),
+      headers: <String, String>{
+        'accept': '/',
+        'Authorization': 'Bearer $token',
+      },
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      setState(() {
-        products = data['data'].take(4).toList();
-      });
+      final Map<String, dynamic> data = jsonDecode(response.body);
+
+      // Check if 'data' contains the list of products under 'list-data'
+      if (data.containsKey('data') && data['data'] is Map<String, dynamic>) {
+        final Map<String, dynamic> dataMap = data['data'];
+
+        // Ensure 'list-data' is available and is a List<dynamic>
+        if (dataMap.containsKey('list-data') &&
+            dataMap['list-data'] is List<dynamic>) {
+          final List<dynamic> productList = dataMap['list-data'];
+
+          // Ensure productList has at least 4 items
+          if (productList.length >= 4) {
+            setState(() {
+              products = productList.take(4).toList();
+            });
+          } else {
+            setState(() {
+              products = productList; // If less than 4, take all
+            });
+          }
+        } else {
+          throw Exception('Invalid products data format');
+        }
+      } else {
+        throw Exception('Products data not found');
+      }
     } else {
       throw Exception('Failed to load products');
     }
