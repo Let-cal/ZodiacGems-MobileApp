@@ -7,13 +7,13 @@ import 'similar_products_widget.dart';
 class ViewDetailProductWidget extends StatelessWidget {
   final Map<String, dynamic>? product;
 
-  const ViewDetailProductWidget({Key? key, this.product}) : super(key: key);
+  const ViewDetailProductWidget({super.key, this.product});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product Details'),
+        title: const Text('Product Details'),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -30,7 +30,10 @@ class ViewDetailProductWidget extends StatelessWidget {
               description: product?['description-product'] ?? '',
             ),
             // Similar Products Widget
-            SimilarProductsWidget(zodiacId: product?['zodiac-id'] ?? 0),
+            SimilarProductsWidget(
+              zodiacId: product?['zodiac-id'] ?? 0,
+              currentProductId: product?['id'] ?? 0,
+            ),
           ],
         ),
       ),

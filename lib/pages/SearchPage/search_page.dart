@@ -70,7 +70,7 @@ class _SearchPageState extends State<SearchPage> {
   final Set<int> _selectedCategoryIds = {};
   String _searchQuery = '';
   int _currentPage = 1; // Track current page
-  int _pageSize = ApiConstants.defaultPageSize; // Default page size
+  final int _pageSize = ApiConstants.defaultPageSize; // Default page size
   Future<List<Map<String, dynamic>>> fetchProducts(
       int page, int pageSize) async {
     final String getProductUrl =
@@ -100,6 +100,7 @@ class _SearchPageState extends State<SearchPage> {
               imageUrl = item['image-urls'][0];
             }
             return {
+              'id': item['id'],
               'title': item['name-product'],
               'description-product': item['description-product'],
               'subtext':
@@ -245,11 +246,11 @@ class _SearchPageState extends State<SearchPage> {
                     future: fetchProducts(_currentPage, _pageSize),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(child: Text('No products found'));
+                        return const Center(child: Text('No products found'));
                       } else {
                         final items = snapshot.data!;
                         final filteredItems = items
@@ -269,7 +270,7 @@ class _SearchPageState extends State<SearchPage> {
                                                   item['category-id'])))
                                       .toList();
                                   if (zodiacFilteredItems.isEmpty) {
-                                    return Center(
+                                    return const Center(
                                       child: Text(
                                         'No products found for selected category and zodiac.',
                                         textAlign: TextAlign.center,
@@ -277,7 +278,7 @@ class _SearchPageState extends State<SearchPage> {
                                     );
                                   }
                                   return Container(
-                                    margin: EdgeInsets.only(
+                                    margin: const EdgeInsets.only(
                                         top:
                                             25.0), // Khoảng cách dưới giữa các Tab
                                     child: SingleChildScrollView(
@@ -292,8 +293,16 @@ class _SearchPageState extends State<SearchPage> {
                                                 item['description-product']!,
                                             price: item['price']!,
                                             onTap: (ctx, prod) =>
-                                                _navigateToDetailView(
-                                                    ctx, prod),
+                                                _navigateToDetailView(ctx, {
+                                              'title': item['title'],
+                                              'description-product':
+                                                  item['description-product'],
+                                              'subtext': item['subtext'],
+                                              'imageUrl': item['imageUrl'],
+                                              'price': item['price'],
+                                              'zodiac-id': item['zodiac-id'],
+                                              'id': item['id'],
+                                            }),
                                           );
                                         }).toList(),
                                       ),
@@ -328,14 +337,14 @@ class _SearchPageState extends State<SearchPage> {
 
   Widget _buildPaginationControls() {
     return Container(
-      margin: EdgeInsets.only(
+      margin: const EdgeInsets.only(
           bottom:
               16.0), // Khoảng cách dưới là 16.0 điểm ảnh, bạn có thể điều chỉnh theo ý muốn
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               if (_currentPage > 1) {
                 setState(() {
@@ -346,7 +355,7 @@ class _SearchPageState extends State<SearchPage> {
           ),
           Text('Page $_currentPage'),
           IconButton(
-            icon: Icon(Icons.arrow_forward),
+            icon: const Icon(Icons.arrow_forward),
             onPressed: () {
               setState(() {
                 _currentPage++;

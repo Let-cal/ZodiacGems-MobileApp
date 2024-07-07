@@ -5,12 +5,17 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../url_API/constants.dart';
+import 'view_detail_product_widget.dart';
 
 class SimilarProductsWidget extends StatefulWidget {
   final int zodiacId;
+  final int currentProductId;
 
-  const SimilarProductsWidget({Key? key, required this.zodiacId})
-      : super(key: key);
+  const SimilarProductsWidget({
+    Key? key,
+    required this.zodiacId,
+    required this.currentProductId,
+  }) : super(key: key);
 
   @override
   _SimilarProductsWidgetState get createState => _SimilarProductsWidgetState();
@@ -27,9 +32,12 @@ class _SimilarProductsWidgetState extends State<SimilarProductsWidget> {
   }
 
   Future<void> fetchSimilarProducts() async {
+    int currentPage = 1; // Track current page
+    const int pageSize = ApiConstants.defaultPageSize; // Default page size
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
-    const String getProductUrl = ApiConstants.getProductEndpoint;
+    final String getProductUrl =
+        '${ApiConstants.getProductEndpoint}?page=$currentPage&pageSize=$pageSize';
 
     try {
       final response = await http.get(
@@ -43,12 +51,24 @@ class _SimilarProductsWidgetState extends State<SimilarProductsWidget> {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final List<dynamic> productList = jsonData['data']['list-data'];
+
+        final filteredProducts = productList
+            .where((product) => product['zodiac-id'] == widget.zodiacId)
+            .toList();
+
         setState(() {
-          _similarProducts = productList
+          _similarProducts = filteredProducts
+              .where((product) =>
+                  product['id'] !=
+                  widget
+                      .currentProductId) // Ensure not to include the same product
               .map((product) => {
+                    'id': product['id'],
                     'name': product['name-product'],
                     'price': '\$${product['price']}',
                     'imageUrl': product['image-urls'][0],
+                    'description': product['description-product'],
+                    'zodiac-id': product['zodiac-id'],
                   })
               .toList();
         });
@@ -58,6 +78,16 @@ class _SimilarProductsWidgetState extends State<SimilarProductsWidget> {
     } catch (e) {
       print('Error fetching similar products: $e');
     }
+  }
+
+  void _navigateToDetailView(
+      BuildContext context, Map<String, dynamic> product) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ViewDetailProductWidget(product: product),
+      ),
+    );
   }
 
   @override
@@ -75,20 +105,26 @@ class _SimilarProductsWidgetState extends State<SimilarProductsWidget> {
             ),
           ),
         ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: _similarProducts.map((product) {
+        SizedBox(
+          height: 200,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _similarProducts.length,
+            itemBuilder: (context, index) {
+              final product = _similarProducts[index];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: _buildSimilarProduct(
-                  context,
-                  product['name'],
-                  product['price'],
-                  product['imageUrl'],
+                child: GestureDetector(
+                  onTap: () => _navigateToDetailView(context, product),
+                  child: _buildSimilarProduct(
+                    context,
+                    product['name'],
+                    product['price'],
+                    product['imageUrl'],
+                  ),
                 ),
               );
-            }).toList(),
+            },
           ),
         ),
       ],
@@ -99,7 +135,6 @@ class _SimilarProductsWidgetState extends State<SimilarProductsWidget> {
       BuildContext context, String name, String price, String imageUrl) {
     return Container(
       width: 120,
-      height: 180,
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
@@ -107,26 +142,40 @@ class _SimilarProductsWidgetState extends State<SimilarProductsWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.network(
-            imageUrl,
-            width: 120,
-            height: 100,
-            fit: BoxFit.cover,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            name,
-            style: const TextStyle(
-              fontFamily: 'Playfair Display',
-              fontSize: 16,
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+            child: Image.network(
+              imageUrl,
+              width: 120,
+              height: 120,
+              fit: BoxFit.cover,
             ),
           ),
-          Text(
-            price,
-            style: TextStyle(
-              fontFamily: 'Playfair Display',
-              fontSize: 14,
-              color: Colors.grey[600],
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontFamily: 'Playfair Display',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 4),
+                Text(
+                  price,
+                  style: TextStyle(
+                    fontFamily: 'Playfair Display',
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
             ),
           ),
         ],

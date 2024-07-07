@@ -107,6 +107,8 @@ class _HomePageState extends State<HomePage> {
 
   void _navigateToDetailView(
       BuildContext context, Map<String, dynamic> product) {
+    _logger.d(product['zodiacId']);
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -126,6 +128,8 @@ class _HomePageState extends State<HomePage> {
             productName: products[j]['name-product'] ?? '', // Ensure not null
             price: '\$${products[j]['price']}', // Ensure not null
             description: products[j]['description-product'] ?? '',
+            zodiacId: products[j]['zodiac-id'] ?? '',
+
             // Ensure not null
             onTap: () {
               _navigateToDetailView(context, {
@@ -133,6 +137,8 @@ class _HomePageState extends State<HomePage> {
                 'name-product': products[j]['name-product'] ?? '',
                 'price': '\$${products[j]['price']}',
                 'description-product': products[j]['description-product'] ?? '',
+                'zodiac-id': products[j]['zodiac-id'] ?? '',
+                'id': products[j]['id'],
               });
             },
           ),

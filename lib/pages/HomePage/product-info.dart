@@ -5,6 +5,7 @@ class ProductItem extends StatelessWidget {
   final String productName;
   final String price;
   final String description;
+  final int zodiacId;
   final VoidCallback onTap;
 
   const ProductItem({
@@ -13,6 +14,7 @@ class ProductItem extends StatelessWidget {
     required this.productName,
     required this.price,
     required this.description,
+    required this.zodiacId,
     required this.onTap,
   });
 
