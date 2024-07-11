@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart'; // Import logger package
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../url_API/constants.dart';
@@ -18,7 +19,7 @@ class _LoginPageWidgetState extends State<LoginPageWidget>
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
   bool _passwordVisibility = false;
-
+  final Logger _logger = Logger(); // Initialize logger
   @override
   void initState() {
     super.initState();
@@ -54,7 +55,9 @@ class _LoginPageWidgetState extends State<LoginPageWidget>
         // Save token using SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', responseBody['token']);
-
+        await prefs.setInt('hint', responseBody['hint']);
+        _logger.d('Token: ${responseBody['token']}');
+        _logger.d('UserID: ${responseBody['hint']}');
         Navigator.pushReplacementNamed(context, '/home');
       } else {
         // Show error message

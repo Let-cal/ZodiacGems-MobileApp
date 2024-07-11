@@ -71,7 +71,7 @@ class _AppBarProductState extends State<AppBarProduct> {
               size: 24,
             ),
             onPressed: () {
-              print('Shopping cart icon pressed');
+              Navigator.pushNamed(context, '/addCart');
             },
           ),
         ),

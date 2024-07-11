@@ -5,10 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart'; // Import logger package
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../NavBar/nav_bar.dart';
 import '../ViewDetails/view_detail_product_widget.dart';
 import '../url_API/constants.dart';
 import './FilterComponents/product-filter-zodiac.dart';
-import 'NavBar/nav_bar.dart';
 import 'app_bar.dart';
 import 'home_image_content.dart';
 import 'image-section.dart';
@@ -35,6 +35,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> fetchProducts() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
+
     const String getProductUrl = ApiConstants.getProductEndpoint;
 
     final response = await http.get(
@@ -79,29 +80,29 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onItemTapped(int index) {
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/cart');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/search');
-        break;
-      case 2:
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-      case 4:
-        Navigator.pushReplacementNamed(context, '/about');
-        break;
-      default:
-        break;
-    }
-
     if (index != _selectedIndex) {
       setState(() {
         _selectedIndex = index;
       });
+
+      switch (index) {
+        case 0:
+          Navigator.pushNamed(context, '/addCart');
+          break;
+        case 1:
+          Navigator.pushNamed(context, '/search');
+          break;
+        case 2:
+          break;
+        case 3:
+          Navigator.pushNamed(context, '/profile');
+          break;
+        case 4:
+          Navigator.pushNamed(context, '/about');
+          break;
+        default:
+          break;
+      }
     }
   }
 

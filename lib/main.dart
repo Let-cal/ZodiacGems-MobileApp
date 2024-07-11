@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart'; // Import logger package
 
+import './pages/AboutUs/about_us_page.dart';
 import './pages/AddCart/cart_page.dart';
 import './pages/HomePage/home_page.dart';
 import './pages/LoginPage/login_page.dart';
 import './pages/SearchPage/search_page.dart';
 import './pages/ViewDetails/view_detail_product_widget.dart';
+import './pages/ProfilePage/Profile_page.dart';
 
 void main() {
   Logger.level =
@@ -26,9 +28,11 @@ class MyApp extends StatelessWidget {
       home: const LoginPageWidget(),
       routes: {
         '/home': (context) => const HomePage(),
-        'AddToCart': (context) => const CartPageWidget(),
         '/login': (context) => const LoginPageWidget(),
         '/viewdetails': (context) => const ViewDetailProductWidget(),
+        '/addCart': (context) => const CartPageWidget(),
+        '/about': (context) => const AboutUsPage(),
+        '/profile': (context) => const ProfilePage(),
         '/search': (context) => const SearchPage(
             initialTabIndex: 0), // Provide a default initialTabIndex
       },

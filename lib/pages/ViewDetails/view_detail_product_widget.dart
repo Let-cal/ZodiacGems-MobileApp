@@ -28,6 +28,7 @@ class ViewDetailProductWidget extends StatelessWidget {
               title: product?['name-product'] ?? 'Name of Product',
               price: '${product?['price'] ?? '500.00'}',
               description: product?['description-product'] ?? '',
+              currentProductId: product?['id'] ?? 0,
             ),
             // Similar Products Widget
             SimilarProductsWidget(

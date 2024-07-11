@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../HomePage/NavBar/nav_bar.dart';
+import '../NavBar/nav_bar.dart';
 import '../ViewDetails/view_detail_product_widget.dart';
 import '../url_API/constants.dart';
 import './menu_items.dart';
@@ -127,7 +127,7 @@ class _SearchPageState extends State<SearchPage> {
   void _onItemTapped(int index) {
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, '/cart');
+        Navigator.pushNamed(context, '/addCart');
         break;
       case 1:
         // No need to navigate to '/search' again if already on search page
@@ -136,10 +136,10 @@ class _SearchPageState extends State<SearchPage> {
         Navigator.pushReplacementNamed(context, '/home');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/profile');
+        Navigator.pushNamed(context, '/profile');
         break;
       case 4:
-        Navigator.pushReplacementNamed(context, '/about');
+        Navigator.pushNamed(context, '/about');
         break;
       default:
         break;
