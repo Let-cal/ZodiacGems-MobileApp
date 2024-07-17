@@ -14,6 +14,14 @@ class ViewDetailProductWidget extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Product Details'),
+           actions: [
+            IconButton(
+              icon: const Icon(Icons.home),
+              onPressed: () {
+                Navigator.pushNamed(context, '/home');
+              },
+            ),
+          ],
       ),
       body: SingleChildScrollView(
         child: Column(

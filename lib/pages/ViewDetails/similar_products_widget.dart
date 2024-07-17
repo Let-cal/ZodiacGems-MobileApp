@@ -12,10 +12,10 @@ class SimilarProductsWidget extends StatefulWidget {
   final int currentProductId;
 
   const SimilarProductsWidget({
-    Key? key,
+    super.key,
     required this.zodiacId,
     required this.currentProductId,
-  }) : super(key: key);
+  });
 
   @override
   _SimilarProductsWidgetState get createState => _SimilarProductsWidgetState();
@@ -95,8 +95,8 @@ class _SimilarProductsWidgetState extends State<SimilarProductsWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           child: Text(
             'Similar Products',
             style: TextStyle(
@@ -143,7 +143,7 @@ class _SimilarProductsWidgetState extends State<SimilarProductsWidget> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
             child: Image.network(
               imageUrl,
               width: 120,
@@ -158,7 +158,7 @@ class _SimilarProductsWidgetState extends State<SimilarProductsWidget> {
               children: [
                 Text(
                   name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Playfair Display',
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -166,7 +166,7 @@ class _SimilarProductsWidgetState extends State<SimilarProductsWidget> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   price,
                   style: TextStyle(

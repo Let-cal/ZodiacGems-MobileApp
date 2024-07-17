@@ -1,40 +1,45 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'order_item.dart';
-import '../url_API/constants.dart';
 
-class OrderList extends StatelessWidget {
+class OrderList extends StatefulWidget {
   final String status;
+  final Future<List<OrderData>> Function(String status, int page) fetchOrders;
+  final int currentPage; // Add currentPage parameter
 
-  const OrderList({super.key, required this.status});
+  const OrderList({
+    super.key,
+    required this.status,
+    required this.fetchOrders,
+    required this.currentPage, // Receive currentPage from parent
+  });
 
-  Future<List<OrderData>> fetchOrders() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    final String getOrdersUrl = '${ApiConstants.getProductInCartEndpoint}?status=$status';
+  @override
+  _OrderListState get createState  => _OrderListState();
+}
 
-    final response = await http.get(
-      Uri.parse(getOrdersUrl),
-      headers: <String, String>{
-        'accept': '*/*',
-        'Authorization': 'Bearer $token',
-      },
-    );
+class _OrderListState extends State<OrderList> {
+  late Future<List<OrderData>> _ordersFuture;
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body)['data'];
-      return data.map((item) => OrderData.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load orders');
+  @override
+  void initState() {
+    super.initState();
+    _ordersFuture = widget.fetchOrders(widget.status, widget.currentPage); // Use currentPage from widget
+  }
+
+  @override
+  void didUpdateWidget(covariant OrderList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentPage != widget.currentPage) {
+      setState(() {
+        _ordersFuture = widget.fetchOrders(widget.status, widget.currentPage); // Fetch new orders when currentPage changes
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<OrderData>>(
-      future: fetchOrders(),
+      future: _ordersFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -45,8 +50,14 @@ class OrderList extends StatelessWidget {
         }
 
         final orders = snapshot.data!;
-        return ListView(
-          children: orders.map((order) => OrderItem(order: order)).toList(),
+        return Column(
+          children: [
+            Expanded(
+              child: ListView(
+                children: orders.map((order) => OrderItem(order: order)).toList(),
+              ),
+            ),
+          ],
         );
       },
     );

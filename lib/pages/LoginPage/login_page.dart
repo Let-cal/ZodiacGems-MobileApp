@@ -58,6 +58,7 @@ class _LoginPageWidgetState extends State<LoginPageWidget>
         await prefs.setInt('hint', responseBody['hint']);
         _logger.d('Token: ${responseBody['token']}');
         _logger.d('UserID: ${responseBody['hint']}');
+        // ignore: use_build_context_synchronously
         Navigator.pushReplacementNamed(context, '/home');
       } else {
         // Show error message

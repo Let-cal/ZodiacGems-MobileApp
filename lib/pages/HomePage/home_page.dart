@@ -87,18 +87,18 @@ class _HomePageState extends State<HomePage> {
 
       switch (index) {
         case 0:
-          Navigator.pushNamed(context, '/addCart');
+          Navigator.pushReplacementNamed(context, '/addCart');
           break;
         case 1:
-          Navigator.pushNamed(context, '/search');
+          Navigator.pushReplacementNamed(context, '/search');
           break;
         case 2:
           break;
         case 3:
-          Navigator.pushNamed(context, '/profile');
+          Navigator.pushReplacementNamed(context, '/profile');
           break;
         case 4:
-          Navigator.pushNamed(context, '/about');
+          Navigator.pushReplacementNamed(context, '/about');
           break;
         default:
           break;
@@ -183,8 +183,9 @@ class _HomePageState extends State<HomePage> {
                             children: buildProductRows(),
                           ),
                     const SizedBox(height: 30),
-                    const ImageSection(),
-                    const SizedBox(height: 30),
+                    products.isEmpty
+                        ? const CircularProgressIndicator()
+                        : ImageSection(products: products),
                   ],
                 ),
               ),

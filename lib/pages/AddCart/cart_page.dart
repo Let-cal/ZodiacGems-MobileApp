@@ -1,10 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart'; // Import logger package
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../NavBar/nav_bar.dart';
 import '../url_API/constants.dart';
+import './payment_page_widget.dart';
 import 'CartItem.dart';
 
 class CartPageWidget extends StatefulWidget {
@@ -16,7 +20,8 @@ class CartPageWidget extends StatefulWidget {
 
 class _CartPageWidgetState extends State<CartPageWidget> {
   late Future<CartData> cartDataFuture;
-
+  int _selectedIndex = 0;
+  final Logger _logger = Logger(); // Initialize logger
   @override
   void initState() {
     super.initState();
@@ -29,6 +34,11 @@ class _CartPageWidgetState extends State<CartPageWidget> {
     String? token = prefs.getString('token');
     final String getProductInCartUrl =
         '${ApiConstants.getProductInCartEndpoint}/$userId';
+
+    if (token == null) {
+      return Future.error('token_not_available');
+    }
+
     if (userId == null) {
       throw Exception('User ID not found');
     }
@@ -47,6 +57,8 @@ class _CartPageWidgetState extends State<CartPageWidget> {
           .map((item) => CartItemData.fromJson(item))
           .toList();
       int totalPrice = data['price-total'];
+      _logger.d(cartItems
+          .first.orderId); // Assuming orderId is the same for all items);
       return CartData(cartItems: cartItems, totalPrice: totalPrice);
     } else {
       throw Exception('Failed to load cart items');
@@ -56,6 +68,9 @@ class _CartPageWidgetState extends State<CartPageWidget> {
   Future<void> deleteCartItem(int orderId, int productId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
+    if (token == null) {
+      return Future.error('token_not_available');
+    }
     final String deleteProductInCartUrl =
         '${ApiConstants.deleteProductInCartEndpoint}/$orderId/$productId';
     final response = await http.delete(
@@ -75,9 +90,85 @@ class _CartPageWidgetState extends State<CartPageWidget> {
     }
   }
 
-  void handleCheckout() {
-    // Implement checkout functionality here
-    print('Checkout button pressed');
+  Future<void> checkout(int orderId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    if (token == null) {
+      throw Exception('Token not available');
+    }
+
+    final String completePaymentUrl =
+        '${ApiConstants.orderEndpoint}/$orderId/complete-payment';
+
+    final response = await http.put(
+      Uri.parse(completePaymentUrl),
+      headers: <String, String>{
+        'accept': '*/*',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        cartDataFuture = fetchCartData();
+      });
+      Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
+        context,
+        MaterialPageRoute(builder: (context) => const PaymentPageWidget()),
+      );
+    } else {
+      throw Exception('Failed to complete payment');
+    }
+  }
+
+  void handleCheckout(int orderId) {
+    checkout(orderId).catchError((error) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Checkout Failed'),
+            content: Text(error.toString()),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    });
+  }
+
+  void _onItemTapped(int index) {
+    if (index != _selectedIndex) {
+      setState(() {
+        _selectedIndex = index;
+      });
+
+      switch (index) {
+        case 0:
+          break;
+        case 1:
+          Navigator.pushReplacementNamed(context, '/search');
+          break;
+        case 2:
+          Navigator.pushReplacementNamed(context, '/home');
+          break;
+        case 3:
+          Navigator.pushReplacementNamed(context, '/profile');
+          break;
+        case 4:
+          Navigator.pushReplacementNamed(context, '/about');
+          break;
+        default:
+          break;
+      }
+    }
   }
 
   @override
@@ -88,6 +179,14 @@ class _CartPageWidgetState extends State<CartPageWidget> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           title: const Text('My Cart'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.shopping_cart_checkout),
+              onPressed: () {
+                Navigator.pushNamed(context, '/orders');
+              },
+            ),
+          ],
         ),
         body: FutureBuilder<CartData>(
           future: cartDataFuture,
@@ -95,7 +194,47 @@ class _CartPageWidgetState extends State<CartPageWidget> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+              if (snapshot.error == 'token_not_available') {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'You need to login to view your cart',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 50, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/login');
+                        },
+                        child: const Text(
+                          'Login',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                return const Center(
+                    child: Text('Do not have any products in your cart'));
+              }
             } else if (!snapshot.hasData || snapshot.data!.cartItems.isEmpty) {
               return const Center(child: Text('Your cart is empty'));
             }
@@ -117,15 +256,22 @@ class _CartPageWidgetState extends State<CartPageWidget> {
                       await deleteCartItem(item.orderId, item.productId);
                     },
                   );
-                }).toList(),
+                }),
                 const SizedBox(height: 16),
                 PriceBreakdown(
                   totalPrice: cartData.totalPrice,
-                  onCheckout: handleCheckout,
+                  onCheckout: () {
+                    checkout(cartItems.first
+                        .orderId); // Assuming orderId is the same for all items
+                  },
                 ),
               ],
             );
           },
+        ),
+        bottomNavigationBar: NavBar(
+          selectedIndex: _selectedIndex,
+          onItemTapped: _onItemTapped,
         ),
       ),
     );

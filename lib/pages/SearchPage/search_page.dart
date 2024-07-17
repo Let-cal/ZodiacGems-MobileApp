@@ -127,7 +127,7 @@ class _SearchPageState extends State<SearchPage> {
   void _onItemTapped(int index) {
     switch (index) {
       case 0:
-        Navigator.pushNamed(context, '/addCart');
+        Navigator.pushReplacementNamed(context, '/addCart');
         break;
       case 1:
         // No need to navigate to '/search' again if already on search page
@@ -136,10 +136,10 @@ class _SearchPageState extends State<SearchPage> {
         Navigator.pushReplacementNamed(context, '/home');
         break;
       case 3:
-        Navigator.pushNamed(context, '/profile');
+        Navigator.pushReplacementNamed(context, '/profile');
         break;
       case 4:
-        Navigator.pushNamed(context, '/about');
+        Navigator.pushReplacementNamed(context, '/about');
         break;
       default:
         break;

@@ -10,5 +10,6 @@ class ApiConstants {
   static const String getProductInCartEndpoint = '$baseUrl/orders/customer';
   static const String updateQuantityEndpoint = '$baseUrl/orders/update-quantity';
   static const String getUserInfoEndpoint = '$baseUrl/users';
+  static const String orderEndpoint = '$baseUrl/orders';
   static const int defaultPageSize = 50; // Default page size
 }

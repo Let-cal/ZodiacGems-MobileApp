@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 
-class AboutUsPage extends StatelessWidget {
-  const AboutUsPage({Key? key}) : super(key: key);
+import '../NavBar/nav_bar.dart';
+
+class AboutUsPage extends StatefulWidget {
+  const AboutUsPage({super.key});
+
+  @override
+  _AboutUsPageState get createState => _AboutUsPageState();
+}
+
+class _AboutUsPageState extends State<AboutUsPage> {
+  int _selectedIndex = 4; // Default to 'About' page index
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +20,7 @@ class AboutUsPage extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch, // Ensure children stretch horizontally
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildHeader(),
             const SizedBox(height: 20),
@@ -23,7 +32,39 @@ class AboutUsPage extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: NavBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
     );
+  }
+
+  void _onItemTapped(int index) {
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/addCart');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/search');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/profile');
+        break;
+      case 4:
+        break;
+      default:
+        break;
+    }
+
+    // Update selected index only if navigation occurs
+    if (index != _selectedIndex) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
   Widget _buildHeader() {
@@ -49,7 +90,7 @@ class AboutUsPage extends StatelessWidget {
             ),
           ),
         ),
-        Positioned(
+        const Positioned(
           bottom: 20,
           left: 20,
           child: Text(
