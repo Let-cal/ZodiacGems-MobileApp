@@ -93,6 +93,7 @@ class OrderDetails extends StatelessWidget {
                   title: product['name-product'],
                   subtext:
                       'Quantity: ${product['quantity']}, Category: ${product['name-category']}, Material: ${product['name-material']}, Gender: ${product['name-gender']}, Zodiac: ${product['zodiac-name']}',
+                  quantity: product['quantity'],
                   description: product['description-product'],
                   imageUrl: product['image-url'],
                   price: '\$${product['price']}',

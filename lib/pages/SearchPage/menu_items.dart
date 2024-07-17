@@ -6,108 +6,117 @@ class MenuItem extends StatelessWidget {
   final String description;
   final String imageUrl;
   final String price;
+  final int quantity; // Thêm quantity vào MenuItem
+
   final Function(BuildContext, Map<String, dynamic>) onTap;
 
   const MenuItem({
-    super.key,
+    Key? key,
     required this.title,
     required this.subtext,
     required this.imageUrl,
     required this.description,
     required this.price,
+    required this.quantity,
     required this.onTap,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => onTap(context, {
-        'title': title,
-        'subtext': subtext,
-        'imageUrl': imageUrl,
-        'description': description,
-        'price': price,
-      }),
+    return GestureDetector(
+      onTap: quantity > 0
+          ? () => onTap(context, {
+                'title': title,
+                'subtext': subtext,
+                'imageUrl': imageUrl,
+                'description': description,
+                'price': price,
+              })
+          : null, // Kiểm tra quantity trước khi gọi onTap
       child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 8),
+        padding: const EdgeInsets.all(8.0),
         child: Container(
-          width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: const [
+            color: quantity > 0
+                ? const Color(0xFFFFF5E1) // Màu sắc chủ đạo của cửa hàng
+                : Colors.grey[300], // Màu sắc cho sản phẩm đã hết hàng
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
               BoxShadow(
-                blurRadius: 3,
-                color: Color(0x411D2429),
-                offset: Offset(0.0, 1),
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: Offset(0, 2),
               ),
             ],
-            borderRadius: BorderRadius.circular(8),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0, 1, 1, 1),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Image.network(
-                      imageUrl,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                    ),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Image.network(
+                    imageUrl,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(8, 8, 4, 0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 4),
-                        Wrap(
-                          spacing: 4,
-                          runSpacing: 4,
-                          children: _buildFormattedSubtext(subtext),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 4,
+                        children: _buildFormattedSubtext(subtext),
+                      ),
+                    ],
                   ),
                 ),
-                Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
-                      child: Icon(
-                        Icons.chevron_right_rounded,
-                        color: Color(0xFF57636C),
-                        size: 24,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: quantity > 0
+                        ? const Icon(
+                            Icons.chevron_right_rounded,
+                            color: Color(0xFF57636C),
+                            size: 24,
+                          )
+                        : const Text(
+                            'Sold Out',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      price,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
                       ),
                     ),
-                    Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0, 12, 4, 8),
-                      child: Text(
-                        price,
-                        textAlign: TextAlign.end,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -124,9 +133,13 @@ class MenuItem extends StatelessWidget {
       Color color = _getChipColor(label);
 
       return Chip(
-        label: Text(value),
+        label: Text(
+          value,
+          style: TextStyle(
+            color: color,
+          ),
+        ),
         backgroundColor: color.withOpacity(0.1),
-        labelStyle: TextStyle(color: color),
       );
     }).toList();
   }

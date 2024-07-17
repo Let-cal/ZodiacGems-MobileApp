@@ -103,6 +103,7 @@ class _SearchPageState extends State<SearchPage> {
               'id': item['id'],
               'title': item['name-product'],
               'description-product': item['description-product'],
+              'quantity': item['quantity'],
               'subtext':
                   'Category: ${categories[item['category-id']]}, Material: ${materials[item['material-id']]}, Gender: ${genders[item['gender-id']]}, Zodiac: ${zodiacs[item['zodiac-id']]}',
               'imageUrl': imageUrl,
@@ -280,7 +281,7 @@ class _SearchPageState extends State<SearchPage> {
                                   return Container(
                                     margin: const EdgeInsets.only(
                                         top:
-                                            25.0), // Khoảng cách dưới giữa các Tab
+                                            40.0), // Khoảng cách dưới giữa các Tab
                                     child: SingleChildScrollView(
                                       child: Column(
                                         children:
@@ -289,6 +290,7 @@ class _SearchPageState extends State<SearchPage> {
                                             title: item['title']!,
                                             subtext: item['subtext']!,
                                             imageUrl: item['imageUrl']!,
+                                            quantity: item['quantity']!,
                                             description:
                                                 item['description-product']!,
                                             price: item['price']!,
