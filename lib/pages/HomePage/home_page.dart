@@ -123,6 +123,7 @@ class _HomePageState extends State<HomePage> {
     for (int i = 0; i < products.length; i += 2) {
       List<Widget> rowChildren = [];
       for (int j = i; j < i + 2 && j < products.length; j++) {
+        bool isSoldOut = products[j]['quantity'] == 0;
         rowChildren.add(
           ProductItem(
             imageUrl: products[j]['image-urls'][0] ?? '', // Ensure not null
@@ -130,18 +131,20 @@ class _HomePageState extends State<HomePage> {
             price: '\$${products[j]['price']}', // Ensure not null
             description: products[j]['description-product'] ?? '',
             zodiacId: products[j]['zodiac-id'] ?? '',
-
-            // Ensure not null
-            onTap: () {
-              _navigateToDetailView(context, {
-                'imageUrl': products[j]['image-urls'][0] ?? '',
-                'name-product': products[j]['name-product'] ?? '',
-                'price': '\$${products[j]['price']}',
-                'description-product': products[j]['description-product'] ?? '',
-                'zodiac-id': products[j]['zodiac-id'] ?? '',
-                'id': products[j]['id'],
-              });
-            },
+            isSoldOut: isSoldOut, // Pass the isSoldOut flag
+            onTap: isSoldOut
+                ? null // Disable onTap if the product is sold out
+                : () {
+                    _navigateToDetailView(context, {
+                      'imageUrl': products[j]['image-urls'][0] ?? '',
+                      'name-product': products[j]['name-product'] ?? '',
+                      'price': '\$${products[j]['price']}',
+                      'description-product':
+                          products[j]['description-product'] ?? '',
+                      'zodiac-id': products[j]['zodiac-id'] ?? '',
+                      'id': products[j]['id'],
+                    });
+                  },
           ),
         );
       }
